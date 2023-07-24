@@ -7,9 +7,8 @@ from typing import *
 
 
 def read_docs(doc_name: str) -> List[List[str]]:
-    f = open(doc_name, 'r')
-    doc = f.readlines()
-    return doc
+    df = pd.read_csv(doc_name, header=None)
+    return df
 
 
 def create_list(doc_A: List[List[str]]) -> List[str]:
@@ -27,13 +26,31 @@ def calc_jaccard(list_A: List[str], list_B: List[str]) -> float:
     return float(len(intersection) / len(union))
 
 
+def compare_docs(doc_A, doc_B):
+    columns = ['A_Index', 'B_Index', 'Jaccard_Score']
+    output = pd.DataFrame(columns=columns)
+    for index1, value1 in doc_A.iterrows():
+        for index2, value2 in doc_B.iterrows():
+            list_A = create_list(value1)
+            list_B = create_list(value2)
+            jaccard_sim = calc_jaccard(list_A, list_B)
+            output = pd.concat([output, pd.DataFrame([[index1, index2, jaccard_sim]], columns=columns)],
+                               ignore_index=True)
+            if jaccard_sim == 1.0:
+                break
+    return output
+
+
 def main():
-    doc_A = read_docs('(original) nfr.txt')
-    doc_B = read_docs('(original) nfr2.txt')
-    list_A = create_list(doc_A)
-    list_B = create_list(doc_B)
-    jaccard_sim = calc_jaccard(list_A, list_B)
-    print(jaccard_sim)
+    doc_A = read_docs('document_a.txt')
+    doc_B = read_docs('document_b.txt')
+    diff = compare_docs(doc_A, doc_B)
+    print(diff)
+    diff.to_csv('jaccard_comparison.csv', index=False)
+    # list_A = create_list(doc_A)
+    # list_B = create_list(doc_B)
+    # jaccard_sim = calc_jaccard(list_A, list_B)
+    # print(jaccard_sim)
 
 
 if __name__ == "__main__":
