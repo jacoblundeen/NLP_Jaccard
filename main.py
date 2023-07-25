@@ -41,16 +41,18 @@ def compare_docs(doc_A, doc_B):
     return output
 
 
+def edit_df(diff):
+    values = list(diff.query("Jaccard_Score == 1.0")['A_Index'])
+    df1 = diff.drop(diff.query('A_Index == @values & Jaccard_Score != 1.0').index)
+    return df1
+
+
 def main():
     doc_A = read_docs('document_a.txt')
     doc_B = read_docs('document_b.txt')
     diff = compare_docs(doc_A, doc_B)
-    print(diff)
-    diff.to_csv('jaccard_comparison.csv', index=False)
-    # list_A = create_list(doc_A)
-    # list_B = create_list(doc_B)
-    # jaccard_sim = calc_jaccard(list_A, list_B)
-    # print(jaccard_sim)
+    output = edit_df(diff)
+    output.to_csv('jaccard_comparison.csv', index=False)
 
 
 if __name__ == "__main__":
